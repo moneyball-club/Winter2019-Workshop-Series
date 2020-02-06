@@ -148,3 +148,84 @@ dim(hitting_table)
 # Exercise: Webscrape the pitching data.
 #https://www.fangraphs.com/leaders.aspx?pos=all&stats=pit&lg=all&qual=y&type=8&season=2019&month=0&season1=2019&ind=0
 #https://www.fangraphs.com/leaders.aspx?pos=all&stats=pit&lg=all&qual=y&type=8&season=2018&month=0&season1=2018&ind=0&team=&rost=&age=&filter=&players=&startdate=&enddate=
+
+url = "https://www.fangraphs.com/leaders.aspx?pos=all&stats=pit&lg=all&qual=y&type=8&season=2019&month=0&season1=2019&ind=0"
+
+url_contents = read_html(url) # Get HTML of page 
+url_contents
+
+pitch_table_html = html_node(url_contents, xpath ='//*[@id="LeaderBoard1_dg1_ctl00"]')
+pitch_table = html_table(pitch_table_html) # get table of html table
+View(pitch_table)
+
+# The rows are off so let's fix that.
+headers <- pitch_table[2,]
+headers
+
+# Assign the row we want to the column headers
+names(pitch_table) <- headers
+names(pitch_table)
+
+# Cut out the first three rows that we don't want
+pitch_table <- pitch_table[-c(1:3),]
+head(pitch_table)
+
+# Create a new variable to track the years
+pitch_table$Year <- 2019
+
+for (year in x) {
+  url = paste0("https://www.fangraphs.com/leaders.aspx?pos=all&stats=pit&lg=all&qual=y&type=8&season=",
+               year, "&month=0&season1=",
+               year,"&ind=0&team=&rost=&age=&filter=&players=&startdate=&enddate=")
+  url_contents = read_html(url)
+  
+  pitch_table_html = html_node(url_contents, xpath ='//*[@id="LeaderBoard1_dg1_ctl00"]')
+  to_add = html_table(pitch_table_html)
+  
+  to_add <- to_add[-c(1:3),]
+  names(to_add) <- headers
+  to_add$Year <- year
+  
+  pitch_table <- rbind(pitch_table, to_add) 
+}
+
+#Fielding
+url = "https://www.fangraphs.com/leaders.aspx?pos=all&stats=fld&lg=all&qual=y&type=8&season=2019&month=0&season1=2019&ind=0"
+
+url_contents = read_html(url) # Get HTML of page 
+url_contents
+
+field_table_html = html_node(url_contents, xpath ='//*[@id="LeaderBoard1_dg1_ctl00"]')
+field_table = html_table(field_table_html) # get table of html table
+View(field_table)
+
+# The rows are off so let's fix that.
+headers <- field_table[2,]
+headers
+
+# Assign the row we want to the column headers
+names(field_table) <- headers
+names(field_table)
+
+# Cut out the first three rows that we don't want
+field_table <- field_table[-c(1:3),]
+head(field_table)
+
+# Create a new variable to track the years
+field_table$Year <- 2019
+
+for (year in x) {
+  url = paste0("https://www.fangraphs.com/leaders.aspx?pos=all&stats=fld&lg=all&qual=y&type=8&season=",
+               year,"&month=0&season1=",
+               year,"&ind=0&team=&rost=&age=&filter=&players=&startdate=&enddate=")
+  url_contents = read_html(url)
+  
+  field_table_html = html_node(url_contents, xpath ='//*[@id="LeaderBoard1_dg1_ctl00"]')
+  to_add = html_table(field_table_html)
+  
+  to_add <- to_add[-c(1:3),]
+  names(to_add) <- headers
+  to_add$Year <- year
+  
+  field_table <- rbind(field_table, to_add) 
+}
