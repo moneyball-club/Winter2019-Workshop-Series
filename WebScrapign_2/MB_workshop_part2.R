@@ -35,6 +35,7 @@ View(mvp_table_df)
 mvp_table_df$`American League winner` <- gsub("[†§^()0-9]+", "", mvp_table_df$`American League winner`)
 mvp_table_df$`National League winner` <- gsub("[†§^()0-9]+", "", mvp_table_df$`National League winner`)
 
+
 tail(mvp_table_df$`American League winner`)
 
 

@@ -9,11 +9,14 @@
 ## Getting Started
 ## ================ ##
 
+setwd("/Users/quilviohernandez/Desktop/code/github-repos/Winter2019-Workshop-Series/Fundamentals")
 
 # Download data to work with
 download.file("http://www.openintro.org/stat/data/mlb11.RData", destfile = "mlb11.RData")
+# As you can see, this commnad takes a URL and downloads it, 
+# placing the results where the destfile argument tells it to
 load("mlb11.RData") 
-# Note this variable will showup in your workspace environment in the top right (30 x 12)
+# Note this variable will showup in your workspace environment in the top right (30 rows x 12 columns)
 # Objects: some loaded, some created
 
 ## ================ ##
