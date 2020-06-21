@@ -1,0 +1,103 @@
+---
+title: "webscraping"
+author: "Quilvio Hernandez"
+date: "6/21/2020"
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+library(rvest)
+library(xml2)
+```
+
+```{r}
+url = "https://en.wikipedia.org/wiki/Major_League_Baseball_Most_Valuable_Player_Award"
+```
+
+```{r}
+url_contents = read_html(url) # Get HTML of page 
+url_contents
+```
+
+```{r}
+mvp_table_html <- html_node(url_contents, xpath ="//*[@id='mw-content-text']/div/table[4]")
+mvp_table_df <- html_table(mvp_table_html) # get table of html table
+View(mvp_table_df)
+```
+
+```{r}
+mvp_table_df$`American League winner` <- gsub("[†§^()0-9]+", "", mvp_table_df$`American League winner`)
+mvp_table_df$`National League winner` <- gsub("[†§^()0-9]+", "", mvp_table_df$`National League winner`)
+
+
+tail(mvp_table_df$`American League winner`)
+```
+
+```{r}
+mvp_table_df$`American League winner` <- trimws(mvp_table_df$`American League winner`, 
+                                                which = "both", whitespace = "[ \t\r\n]")
+mvp_table_df$`National League winner` <- trimws(mvp_table_df$`National League winner`, 
+                                                which = "both", whitespace = "[ \t\r\n]")
+```
+
+```{r}
+al_mvps <- mvp_table_df[,c(1:4)]
+nl_mvps <- mvp_table_df[,c(1,5:7)]
+
+head(al_mvps)
+head(nl_mvps)
+```
+
+```{r}
+url = "https://www.fangraphs.com/leaders.aspx?pos=all&stats=bat&lg=all&qual=y&type=8&season=2019&month=0&season1=2019&ind=0"
+
+url_contents = read_html(url) # Get HTML of page 
+url_contents
+```
+
+```{r}
+hitting_table_html = html_node(url_contents, xpath ='//*[@id="LeaderBoard1_dg1_ctl00"]')
+hitting_table = html_table(hitting_table_html) # get table of html table
+View(hitting_table)
+```
+
+```{r}
+headers <- hitting_table[2,]
+headers
+```
+```{r}
+names(hitting_table) <- headers
+names(hitting_table)
+```
+
+```{r}
+hitting_table <- hitting_table[-c(1:3),]
+head(hitting_table)
+```
+
+```{r}
+hitting_table$Year <- 2019
+```
+
+```{r}
+hitting_table[, c(1, 4:9, 12:22)] <- sapply(hitting_table[, c(1, 4:9, 12:22)], as.numeric)
+hitting_table %>% 
+  glimpse()
+```
+
+```{r}
+hitting_table %>% 
+  filter(HR > 35, AVG > .280)
+```
+
+```{r}
+nl_mvps %>% 
+  filter(Position == "RHP" | Position == "LHP")
+```
+
+```{r}
+al_mvps %>% 
+  filter(Position == "RHP" | Position == "LHP")
+```
+
