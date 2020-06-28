@@ -31,6 +31,7 @@ mvp_table_df$`American League winner` <- gsub("[†§^()0-9]+", "", mvp_table_df
 mvp_table_df$`National League winner` <- gsub("[†§^()0-9]+", "", mvp_table_df$`National League winner`)
 
 
+
 tail(mvp_table_df$`American League winner`)
 ```
 
@@ -139,5 +140,101 @@ pitching_table %>%
 ```{r}
 pitching_table %>%
   filter(W >= 15, ERA < 3.5)
+```
+
+```{r}
+nl_mvps$Team <- gsub("[*]+", "", nl_mvps$Team)
+al_mvps$Team <- gsub("[*]+", "", al_mvps$Team)
+```
+
+```{r}
+al_mvps %>% 
+  head()
+```
+
+```{r}
+names(nl_mvps)
+names(hitting_table)
+```
+
+```{r}
+names(hitting_table)
+```
+
+```{r}
+hitting_table <- hitting_table %>% 
+  left_join(nl_mvps, by = c("Name" = "National League winner", "Year"), 
+            suffix = c("_hitting", "_mvp")) %>% 
+  mutate(NL_MVP = if_else(!is.na(Team),1,0),
+         Position = NULL) 
+  
+```
+
+```{r}
+head(hitting_table)
+# hitting_table <- hitting_table %>% 
+#   mutate(Team_hitting_hitting = NULL)
+```
+
+```{r}
+hitting_table <- hitting_table %>% 
+  left_join(al_mvps, by = c("Name" = "American League winner", "Year"), 
+            suffix = c("_hitting", "_mvp")) %>% 
+  mutate(AL_MVP = if_else(!is.na(Team),1,0),
+         Team = NULL,
+         Position = NULL)
+```
+
+```{r}
+dim(hitting_table)
+```
+
+```{r}
+hitting_table %>% 
+  glimpse()
+
+hitting_table[, c(1, 3:22)] <- sapply(hitting_table[, c(1, 3:24)], as.numeric)
+hitting_table[, c(22:24)] <- sapply(hitting_table[, c(22:24)], as.factor)
+
+hitting_table %>% 
+  glimpse()
+```
+```{r}
+levels(hitting_table$NL_MVP)
+```
+```{r}
+hitting_table <- hitting_table %>% 
+  mutate(MVP = if_else((AL_MVP == 1 | NL_MVP == 1),1,0),
+         MVP = as.factor(MVP))
+```
+
+
+```{r}
+hitting_table %>% 
+  ggplot(aes(x = HR, y = AVG, color = MVP)) + 
+  geom_point() 
+```
+
+```{r}
+hitting_table %>% 
+  ggplot(aes(x = AVG, color = MVP)) + 
+  geom_density() 
+```
+
+```{r}
+hitting_table %>% 
+  ggplot(aes(x = HR, color = MVP)) + 
+  geom_density() 
+```
+
+```{r}
+ggplot(data = filter(hitting_table, AL_MVP == 1), aes(x = Year, y = HR))
+```
+
+```{r}
+hitting_table %>% 
+  filter(AL_MVP == 1) %>% 
+  ggplot(aes(x = Year, y = HR)) + 
+  geom_line() 
 ```
 
