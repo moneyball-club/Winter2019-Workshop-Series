@@ -35,9 +35,9 @@ tail(mvp_table_df$`American League winner`)
 ```
 
 ```{r}
-mvp_table_df$`American League winner` <- trimws(mvp_table_df$`American League winner`, 
+mvp_table_df$'American League winner' <- trimws(mvp_table_df$`American League winner`, 
                                                 which = "both", whitespace = "[ \t\r\n]")
-mvp_table_df$`National League winner` <- trimws(mvp_table_df$`National League winner`, 
+mvp_table_df$'National League winner' <- trimws(mvp_table_df$`National League winner`, 
                                                 which = "both", whitespace = "[ \t\r\n]")
 ```
 
@@ -99,5 +99,45 @@ nl_mvps %>%
 ```{r}
 al_mvps %>% 
   filter(Position == "RHP" | Position == "LHP")
+```
+```{r}
+# webscraping 2019 pitcher data
+pitcher_url = "https://www.fangraphs.com/leaders.aspx?pos=all&stats=pit&lg=all&qual=y&type=8&season=2019&month=0&season1=2019&ind=0"
+
+pitcher_url_contents = read_html(pitcher_url)
+pitcher_url_contents
+```
+```{r}
+pitching_table_html = html_node(pitcher_url_contents, xpath = '//*[@id="LeaderBoard1_dg1_ctl00"]')
+pitching_table = html_table(pitching_table_html)
+View(pitching_table)
+```
+
+```{r}
+pitcher_headers = pitching_table[2,]
+names(pitching_table) = pitcher_headers
+
+```
+
+```{r}
+pitching_table = pitching_table[-c(1:3),]
+head(pitching_table)
+```
+```{r}
+pitching_table$Year = 2019
+head(pitching_table)
+```
+```{r}
+pitching_table %>%
+  filter(W >= 15)
+```
+```{r}
+pitching_table[, c(4:13,17:20)] = sapply(pitching_table[, c(4:13, 17:20)], as.numeric)
+pitching_table %>% 
+  glimpse()
+```
+```{r}
+pitching_table %>%
+  filter(W >= 15, ERA < 3.5)
 ```
 
