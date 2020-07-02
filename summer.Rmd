@@ -90,6 +90,10 @@ hitting_table$Year <- 2019
 
 ```{r}
 x = 1931:2018
+x
+```
+
+```{r}
 for (year in x) {
   url = paste0("https://www.fangraphs.com/leaders.aspx?pos=all&stats=bat&lg=all&qual=y&type=8&season=",
                year,"&month=0&season1=",
@@ -106,6 +110,7 @@ for (year in x) {
   hitting_table <- rbind(hitting_table, to_add) 
 }
 ```
+
 
 
 
