@@ -6,9 +6,9 @@ output: html_document
 ---
 
 ```{r}
-library(tidyverse)
-library(rvest)
 library(xml2)
+library(rvest)
+library(tidyverse)
 ```
 
 ```{r}
@@ -50,6 +50,7 @@ head(al_mvps)
 head(nl_mvps)
 ```
 
+
 ```{r}
 url = "https://www.fangraphs.com/leaders.aspx?pos=all&stats=bat&lg=all&qual=y&type=8&season=2019&month=0&season1=2019&ind=0"
 
@@ -62,6 +63,10 @@ hitting_table_html = html_node(url_contents, xpath ='//*[@id="LeaderBoard1_dg1_c
 hitting_table = html_table(hitting_table_html) # get table of html table
 View(hitting_table)
 ```
+
+
+
+
 
 ```{r}
 headers <- hitting_table[2,]
@@ -80,6 +85,29 @@ head(hitting_table)
 ```{r}
 hitting_table$Year <- 2019
 ```
+
+
+
+```{r}
+x = 1931:2018
+for (year in x) {
+  url = paste0("https://www.fangraphs.com/leaders.aspx?pos=all&stats=bat&lg=all&qual=y&type=8&season=",
+               year,"&month=0&season1=",
+               year,"&ind=0&team=&rost=&age=&filter=&players=&startdate=&enddate=")
+  url_contents = read_html(url)
+  
+  hitting_table_html = html_node(url_contents, xpath ='//*[@id="LeaderBoard1_dg1_ctl00"]')
+  to_add = html_table(hitting_table_html)
+  
+  to_add <- to_add[-c(1:3),]
+  names(to_add) <- headers
+  to_add$Year <- year
+ 
+  hitting_table <- rbind(hitting_table, to_add) 
+}
+```
+
+
 
 ```{r}
 hitting_table[, c(1, 4:9, 12:22)] <- sapply(hitting_table[, c(1, 4:9, 12:22)], as.numeric)
@@ -165,15 +193,20 @@ names(hitting_table)
 hitting_table <- hitting_table %>% 
   left_join(nl_mvps, by = c("Name" = "National League winner", "Year"), 
             suffix = c("_hitting", "_mvp")) %>% 
-  mutate(NL_MVP = if_else(!is.na(Team),1,0),
+  mutate(NL_MVP = if_else(!is.na(Team_mvp),1,0),
          Position = NULL) 
   
 ```
 
 ```{r}
+View(hitting_table)
+
+```
+
+```{r}
 head(hitting_table)
-# hitting_table <- hitting_table %>% 
-#   mutate(Team_hitting_hitting = NULL)
+ hitting_table <- hitting_table %>% 
+   mutate(Team_hitting = NULL)
 ```
 
 ```{r}
@@ -183,6 +216,14 @@ hitting_table <- hitting_table %>%
   mutate(AL_MVP = if_else(!is.na(Team),1,0),
          Team = NULL,
          Position = NULL)
+```
+
+```{r}
+head(hitting_table)
+```
+
+```{r}
+head(hitting_table)
 ```
 
 ```{r}
