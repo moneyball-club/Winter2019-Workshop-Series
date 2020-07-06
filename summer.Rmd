@@ -279,8 +279,168 @@ ggplot(data = filter(hitting_table, AL_MVP == 1), aes(x = Year, y = HR))
 
 ```{r}
 hitting_table %>% 
-  filter(AL_MVP == 1) %>% 
+  filter(MVP == 1) %>% 
   ggplot(aes(x = Year, y = HR)) + 
-  geom_line() 
+  geom_line()
 ```
 
+```{r}
+ggplot() +
+  geom_line(data = subset(hitting_table, NL_MVP == 1), aes(x = Year, y = HR), 
+            color = "red") + 
+  geom_line(data = subset(hitting_table, AL_MVP == 1), aes(x = Year, y = HR), 
+            color = "blue")
+```
+
+```{r}
+names(hitting_table)
+```
+
+
+```{r}
+hitting_table %>% 
+  ggplot(aes(x = WAR, color = MVP)) + 
+  geom_density() #significant
+
+hitting_table %>% 
+  ggplot(aes(x = ISO, color = MVP)) + 
+  geom_density() #meh
+
+hitting_table %>% 
+  ggplot(aes(x = AVG, color = MVP)) + 
+  geom_density() #meh
+
+hitting_table %>% 
+  ggplot(aes(x = R, color = MVP)) + 
+  geom_density() #useful
+
+hitting_table %>% 
+  ggplot(aes(x = RBI, color = MVP)) + 
+  geom_density() #useful
+
+hitting_table %>% 
+  ggplot(aes(x = HR, color = MVP)) + 
+  geom_density() #useful
+
+hitting_table %>% 
+  ggplot(aes(x = G, color = MVP)) + 
+  geom_density() #useless
+
+hitting_table %>% 
+  ggplot(aes(x = wOBA, color = MVP)) + 
+  geom_density() #meh
+
+hitting_table %>% 
+  ggplot(aes(x = OBP, color = MVP)) + 
+  geom_density() #mild
+
+hitting_table %>% 
+  ggplot(aes(x = `wRC+`, color = MVP)) + 
+  geom_density() #keep
+
+hitting_table %>% 
+  ggplot(aes(x = BsR, color = MVP)) + 
+  geom_density()  #USELESS 
+
+hitting_table %>% 
+  ggplot(aes(x = SB, color = MVP)) + 
+  geom_density()  #no diff
+
+hitting_table %>% 
+  ggplot(aes(x = BABIP, color = MVP)) + 
+  geom_density()  #no diff
+
+hitting_table %>% 
+  ggplot(aes(x = Off, color = MVP)) + 
+  geom_density()  #no diff
+
+hitting_table %>% 
+  ggplot(aes(x = Def, color = MVP)) + 
+  geom_density()  #no diff
+```
+
+```{r}
+hitting_table %>% 
+  filter(MVP == 1) %>% 
+  summarise(min = min(WAR), 
+            max = max(WAR))
+
+hitting_table %>% 
+  filter(WAR == 3.9 & MVP == 1)
+```
+
+```{r}
+hitting_table <- hitting_table %>% 
+  group_by(Year) %>% 
+  mutate(rank_HR = min_rank(-HR),
+         rank_R = min_rank(-R),
+         rank_SB = min_rank(-SB),
+         rank_ISO = min_rank(-ISO),
+         rank_BABIP = min_rank(-BABIP),
+         rank_AVG = min_rank(-AVG),
+         rank_OBP = min_rank(-OBP),
+         rank_SLG = min_rank(-SLG),
+         rank_wOBA = min_rank(-wOBA),
+         `rank_wRC+` = min_rank(-`wRC+`),
+         rank_BsR = min_rank(-BsR),
+         rank_Off = min_rank(-Off),
+         rank_WAR = min_rank(-WAR)
+         ) 
+```
+
+
+```{r}
+hitting_table %>% 
+  group_by(MVP) %>% 
+  summarise(avg_HR_rank = mean(rank_HR),
+            avg_R_rank = mean(rank_R),
+            rank_SB = mean(rank_SB),
+           rank_ISO = mean(rank_ISO),
+           rank_BABIP = mean(rank_BABIP),
+           rank_AVG = mean(rank_AVG),
+           rank_OBP = mean(rank_OBP),
+           rank_SLG = mean(rank_SLG),
+           rank_wOBA = mean(rank_wOBA),
+           `rank_wRC+` = mean(`rank_wRC+`),
+           rank_BsR = mean(rank_BsR),
+           rank_Off = mean(rank_Off),
+           rank_WAR = mean(rank_WAR)
+  )
+```
+
+```{r}
+hitting_table %>% 
+  ggplot(aes(x = HR, color = MVP)) + 
+  geom_boxplot() +
+  coord_flip()
+
+hitting_table %>% 
+  ggplot(aes(x = WAR, color = MVP)) + 
+  geom_boxplot() +
+  coord_flip()
+
+hitting_table %>% 
+  ggplot(aes(x = Off, color = MVP)) + 
+  geom_boxplot() +
+  coord_flip()
+
+hitting_table %>% 
+  ggplot(aes(x = `wRC+`, color = MVP)) + 
+  geom_boxplot() +
+  coord_flip()
+
+hitting_table %>% 
+  ggplot(aes(x = wOBA, color = MVP)) + 
+  geom_boxplot() +
+  coord_flip()
+```
+
+```{r}
+library(corrplot)
+library(corrgram)
+library(RColorBrewer)
+
+M <- round(cor(hitting_table[-c(1, 2, 9, 10, 23:38)]), 2)
+corrplot(M, type = "upper", method = "color",
+         col=brewer.pal(n=8, name="PuOr"))
+```
