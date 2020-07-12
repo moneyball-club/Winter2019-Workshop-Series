@@ -444,3 +444,92 @@ M <- round(cor(hitting_table[-c(1, 2, 9, 10, 23:38)]), 2)
 corrplot(M, type = "upper", method = "color",
          col=brewer.pal(n=8, name="PuOr"))
 ```
+
+```{r}
+library(caret)
+library(AppliedPredictiveModeling)
+```
+
+```{r}
+nzv <- nearZeroVar(hitting_table, saveMetrics= TRUE)
+nzv[nzv$nzv,][1:3,]
+```
+
+```{r}
+nzv <- nearZeroVar(hitting_table)
+nzv
+```
+
+
+```{r}
+descrCor <- cor(hitting_table[-c(1, 2, 9, 10, 23:38)])
+corrplot(descrCor, type = "upper", method = "color",
+         col=brewer.pal(n=8, name="PuOr"))
+summary(descrCor[upper.tri(descrCor)])
+highlyCorDescr <- findCorrelation(descrCor, cutoff = .9)
+highlyCorDescr
+filteredDescr <- descrCor[,-highlyCorDescr]
+descrCor2 <- cor(filteredDescr)
+descrCor2
+corrplot(descrCor2, type = "upper", method = "color",
+         col=brewer.pal(n=8, name="PuOr"))
+# filteredDescr <- filteredDescr[,-highlyCorDescr]
+# descrCor2 <- cor(filteredDescr)
+# summary(descrCor2[upper.tri(descrCor2)])
+```
+
+```{r}
+table(hitting_table$MVP)
+```
+
+
+```{r}
+set.seed(0712)
+hitting_table$MVP <- as.factor(hitting_table$MVP)
+test <- hitting_table %>% group_by(MVP) %>% sample_frac(.3)
+train <- setdiff(hitting_table, test)
+dim(test)
+dim(train)
+```
+
+```{r}
+table(test$MVP)
+table(train$MVP)
+```
+
+```{r}
+train[, -c(9, 10,22:24, 26:38)]
+names(train)
+```
+
+
+```{r}
+down_train <- downSample(x = train[, -c(9, 10,22:38)],
+                         y = train$MVP)
+dim(down_train)
+table(down_train$Class)
+down_train
+```
+
+```{r}
+up_train <- upSample(x = train[, -c(9, 10,22:38)],
+                     y = train$MVP)                         
+dim(up_train)
+table(up_train$Class)
+up_train
+```
+
+```{r}
+library(DMwR)
+
+set.seed(9560)
+smote_train <- SMOTE(MVP ~ ., data  = train[, -c(9, 10,22:38)])                         
+table(smote_train$Class) 
+```
+
+```{r}
+set.seed(9560)
+rose_train <- ROSE(MVP ~ ., data  = train[, -c(9, 10,22:38)])$data                         
+table(rose_train$Class)
+```
+
