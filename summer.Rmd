@@ -440,7 +440,7 @@ library(corrplot)
 library(corrgram)
 library(RColorBrewer)
 
-M <- round(cor(hitting_table[-c(1, 2, 9, 10, 23:38)]), 2)
+M <- round(cor(hitting_table[-c(1, 2, 9, 10, 21:36)]), 2)
 corrplot(M, type = "upper", method = "color",
          col=brewer.pal(n=8, name="PuOr"))
 ```
@@ -462,7 +462,7 @@ nzv
 
 
 ```{r}
-descrCor <- cor(hitting_table[-c(1, 2, 9, 10, 23:38)])
+descrCor <- cor(hitting_table[-c(1, 2, 9, 10, 21:38)])
 corrplot(descrCor, type = "upper", method = "color",
          col=brewer.pal(n=8, name="PuOr"))
 summary(descrCor[upper.tri(descrCor)])
@@ -523,13 +523,55 @@ up_train
 library(DMwR)
 
 set.seed(9560)
-smote_train <- SMOTE(MVP ~ ., data  = train[, -c(9, 10,22:38)])                         
-table(smote_train$Class) 
+smote_train <- SMOTE(MVP ~ ., data  = as.data.frame(train[, -c(1, 2,9, 10,17, 22:24, 26:38)]))
+table(smote_train$MVP) 
 ```
 
 ```{r}
 set.seed(9560)
-rose_train <- ROSE(MVP ~ ., data  = train[, -c(9, 10,22:38)])$data                         
-table(rose_train$Class)
+rose_train <- ROSE(MVP ~ G+PA+HR+R+RBI+SB+ISO+BABIP+AVG+
+                     OBP+SLG+wOBA+BsR+Off+Def+WAR, data  = train[, -c(2,9, 10,22:24, 26:38)])$data                    
+table(rose_train$MVP)
+```
+
+```{r}
+ROSE(MVP ~ G+PA+HR+R+RBI+SB+ISO+BABIP+AVG+OBP+SLG+wOBA, data  = train[, -c(2,9, 10,22:24, 26:38)])
+
+```
+
+```{r}
+y <- train$MVP
+x <- train[-c(1,2,9, 10, 22:39)]
+```
+
+```{r}
+fitControl <- trainControl(method = "repeatedcv",
+                           number = 10,
+                           repeats = 10)
+
+set.seed(825)
+rfFit <- train(MVP ~ ., data = train[-c(1,2,9, 10, 22:25, 27:39)], 
+                 method = "rf", 
+                 trControl = fitControl,
+                 verbose = FALSE)
+rfFit
+```
+
+```{r}
+x <- predict(rfFit, newdata = test[-c(1,2,9, 10, 22:25, 27:39)], type = "prob")
+```
+
+```{r}
+test$mvpodds <- x$`1`
+```
+
+```{r}
+test %>% 
+  slice_max(order_by = mvpodds,
+            n = 10)
+```
+
+```{r}
+median(test$mvpodds)
 ```
 
